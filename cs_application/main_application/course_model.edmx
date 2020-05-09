@@ -1,0 +1,129 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="Хранилище coursedbModel" Provider="System.Data.SQLite.EF6" ProviderManifestToken="data source=C:\GIT\networks_course_project\application_folder\cs_application\main_application\bin\Debug\coursedb.sqlite3" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="inbox">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="integer" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="sender" Type="nvarchar" MaxLength="2147483647" Nullable="false" />
+          <Property Name="recepient" Type="nvarchar" MaxLength="2147483647" Nullable="false" />
+          <Property Name="re" Type="nvarchar" MaxLength="2147483647" Nullable="false" />
+          <Property Name="msg" Type="nvarchar" MaxLength="2147483647" Nullable="false" />
+          <Property Name="status" Type="nvarchar" MaxLength="2147483647" Nullable="false" />
+          <Property Name="foreign_id" Type="integer" />
+          <Property Name="date_received" Type="nvarchar" MaxLength="2147483647" />
+        </EntityType>
+        <EntityType Name="outbox">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="integer" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="sender" Type="nvarchar" MaxLength="2147483647" Nullable="false" />
+          <Property Name="recepient" Type="nvarchar" MaxLength="2147483647" Nullable="false" />
+          <Property Name="re" Type="nvarchar" MaxLength="2147483647" Nullable="false" />
+          <Property Name="msg" Type="nvarchar" MaxLength="2147483647" Nullable="false" />
+          <Property Name="status" Type="nvarchar" MaxLength="2147483647" Nullable="false" />
+          <Property Name="foreign_id" Type="integer" />
+          <Property Name="date_sent" Type="nvarchar" MaxLength="2147483647" />
+        </EntityType>
+        <EntityContainer Name="Хранилище coursedbModelContainer">
+          <EntitySet Name="inbox" EntityType="Self.inbox" store:Type="Tables" />
+          <EntitySet Name="outbox" EntityType="Self.outbox" store:Type="Tables" />
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="coursedbModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="inbox">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="sender" Type="String" MaxLength="2147483647" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="recepient" Type="String" MaxLength="2147483647" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="re" Type="String" MaxLength="2147483647" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="msg" Type="String" MaxLength="2147483647" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="status" Type="String" MaxLength="2147483647" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="foreign_id" Type="Int64" Nullable="true" />
+          <Property Name="date_received" Type="String" MaxLength="2147483647" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="outbox">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="sender" Type="String" MaxLength="2147483647" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="recepient" Type="String" MaxLength="2147483647" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="re" Type="String" MaxLength="2147483647" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="msg" Type="String" MaxLength="2147483647" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="status" Type="String" MaxLength="2147483647" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="foreign_id" Type="Int64" Nullable="true" />
+          <Property Name="date_sent" Type="String" MaxLength="2147483647" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityContainer Name="CourseDB" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="inbox" EntityType="Self.inbox" />
+          <EntitySet Name="outbox" EntityType="Self.outbox" />
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="Хранилище coursedbModelContainer" CdmEntityContainer="CourseDB">
+          <EntitySetMapping Name="inbox">
+            <EntityTypeMapping TypeName="coursedbModel.inbox">
+              <MappingFragment StoreEntitySet="inbox">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="sender" ColumnName="sender" />
+                <ScalarProperty Name="recepient" ColumnName="recepient" />
+                <ScalarProperty Name="re" ColumnName="re" />
+                <ScalarProperty Name="msg" ColumnName="msg" />
+                <ScalarProperty Name="status" ColumnName="status" />
+                <ScalarProperty Name="foreign_id" ColumnName="foreign_id" />
+                <ScalarProperty Name="date_received" ColumnName="date_received" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="outbox">
+            <EntityTypeMapping TypeName="coursedbModel.outbox">
+              <MappingFragment StoreEntitySet="outbox">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="sender" ColumnName="sender" />
+                <ScalarProperty Name="recepient" ColumnName="recepient" />
+                <ScalarProperty Name="re" ColumnName="re" />
+                <ScalarProperty Name="msg" ColumnName="msg" />
+                <ScalarProperty Name="status" ColumnName="status" />
+                <ScalarProperty Name="foreign_id" ColumnName="foreign_id" />
+                <ScalarProperty Name="date_sent" ColumnName="date_sent" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="Нет" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>
