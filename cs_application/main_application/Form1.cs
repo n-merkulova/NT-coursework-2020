@@ -15,7 +15,7 @@ namespace main_application
         public bool DEBUG_MODE = false;
         public bool RET_ALLOWED = false;
 
-        // Использется для передачти байтов по компорту
+        // Использется для передачи байтов по COM порту
         public static Encoding WIN1251 = Encoding.GetEncoding("windows-1251");
         public static Encoding ASCII = Encoding.ASCII;
 
@@ -72,7 +72,7 @@ namespace main_application
         //Списки принятых данных для обмена между потоками Serial1_receiving2() и FindFrame2()
         public List<byte> ReceivedFrames2 = new List<byte>();
 
-        // Структура для хранения задания(кадра)
+        // Структура для хранения задания (кадра)
         public struct One_Task
         {
             public string PortNum;
@@ -82,23 +82,22 @@ namespace main_application
                 PortNum = name;
                 Frame = frame;
             }
-
-
         }
-        // Список заданий используется четырмя потоками - По два на каждый порт
+
+        // Список заданий используется четырьмя потоками - По два на каждый порт
         // Формат записи заданий One_Task("Номер порта", Байты[] пришедшие в порт)
-        //Список заданий, новое задание помещается в конец списка, выполненное удаляется из начала списка
+        // Список заданий, новое задание помещается в конец списка, выполненное удаляется из начала списка
         // Список заданий содержит задания из первого и второго порта
         public List<One_Task> TasksReceived = new List<One_Task>();
 
-        //Мьютекс для согласования: чтения, записи, и изменения заданий
+        // Мьютекс для согласования: чтения, записи, и изменения заданий
         // Использется для первого и второго порта одновременно
         public Mutex TaskReceived_mutex = new Mutex();
 
 
         public List<One_Task> TasksToSend = new List<One_Task>();
 
-        //Мьютекс для согласования: чтения, записи, и изменения заданий
+        // Мьютекс для согласования: чтения, записи, и изменения заданий
         // Использется для первого и второго порта одновременно
         public Mutex TaskToSend_mutex = new Mutex();
 
@@ -495,10 +494,10 @@ namespace main_application
             string[] portslist = SerialPort.GetPortNames();
 
             /*************************************************************
-                              ЗАДАНИЕ ПАРАМЕТРОВ КОМПОРТА  
+                              ЗАДАНИЕ ПАРАМЕТРОВ COM ПОРТА  
              *************************************************************/
-            //// Начальное задание параметров ком портов
-            //Соединенные пары портов { COM3 <-> COM4, COM6 <-> COM7, COM8 <-> COM9 }
+            // Начальное задание параметров COM портов
+            // Соединенные пары портов { COM3 <-> COM4, COM6 <-> COM7, COM8 <-> COM9 }
             serialPort1.Encoding = WIN1251;
             serialPort1.BaudRate = 9600;
             serialPort1.DataBits = 8;
@@ -513,20 +512,21 @@ namespace main_application
             serialPort2.Parity = Parity.None;
             serialPort2.StopBits = StopBits.One;
             serialPort2.Handshake = Handshake.RequestToSend;
-
             serialPort2.PortName = "COM6";
+
             toolStripComboBox3.SelectedItem = "9600";
             SelectedBaudrate = "9600";
             toolStripComboBox1.Items.AddRange(SerialPort.GetPortNames());
             toolStripComboBox2.Items.AddRange(SerialPort.GetPortNames());
+
             //Port1 
             toolStripComboBox1.SelectedItem = "COM3";
-
             SelectedPort1Name = "COM3";
 
             //Port2
             toolStripComboBox2.SelectedItem = "COM6";
             SelectedPort2Name = "COM6";
+
             this.button1.Enabled = true;
             this.button4.Enabled = false;
             this.AuthConnectButton.Enabled = true;
@@ -545,7 +545,7 @@ namespace main_application
                ПОЛУЧЕНИЕ КАДРОВ ИЗ ПОРТОВ И ЗАПОЛНЕНИЕ СПИСКА ЗАДАНИЙ
          ****************************************************************/
         public enum ReceiveState { SOF_FOUND, EOF_FOUND, FREE }
-        // Функции для считывания данных из ком порта в отдельном потоке
+        // Функции для считывания данных из COM порта в отдельном потоке
         public void Serial1_StartReceiving()
         {
             if (!serialPort1.IsOpen)
@@ -564,15 +564,15 @@ namespace main_application
                 {
                     try
                     {
-                        //Чтение принятых данных из компорта в буферный массив принятых байтов
+                        // Чтение принятых данных из компорта в буферный массив принятых байтов
                         serialPort1.Read(ReceivedBytes, 0, bytestoread);
-                        //Вход в критическую секцию
-                        //разделяемый ресурс- Список байт, принятых из порта ReceivedFrames
+                        // Вход в критическую секцию
+                        // разделяемый ресурс- Список байт, принятых из порта ReceivedFrames
                         ReceivedFrames_mutex1.WaitOne();
-                        //Запись новых данных из компорта в глобальный Массив Принятых данных   
+                        // Запись новых данных из компорта в глобальный Массив Принятых данных   
                         ReceivedFrames1.AddRange(ReceivedBytes);
                         ReceivedFrames_mutex1.ReleaseMutex();
-                        //Выход из критической секции
+                        // Выход из критической секции
                     }
                     catch (InvalidOperationException ex)
                     { MessageBox.Show(ex.Message, "Error!"); }
@@ -582,24 +582,24 @@ namespace main_application
         }
 
         // просматривает Список ReceivedFrames и разбирает найденные кадры
-        // Читает поток входящих байт и порта 1 и  заполняет список заданий в формате One_Task(Номер порта, Байты кадра)
+        // Читает поток входящих байт из порта 1 и заполняет список заданий в формате One_Task(Номер порта, Байты кадра)
         public void FindFrameInPort1()
         {
             int startbyte;
             int stopbyte;
             List<byte> Frame = new List<byte>();
-            //Наачльное состояние функции при запуске
+            // Начальное состояние функции при запуске
             ReceiveState State = ReceiveState.FREE;
             while (true)
             {
-                //Вход в критическую секцию
-                //разделяемый ресурс- Список байт, принятых из порта
+                // Вход в критическую секцию
+                // разделяемый ресурс- Список байт, принятых из порта
                 ReceivedFrames_mutex1.WaitOne();
-                //Выполнение условия, только если новый кадр ещё не поступил, а старый уже обработан
+                // Выполнение условия, только если новый кадр ещё не поступил, а старый уже обработан
                 if (State == ReceiveState.FREE)
                 {
-                    startbyte = ReceivedFrames1.IndexOf(0xFF);
-                    stopbyte = ReceivedFrames1.IndexOf(0xFE);
+                    startbyte = ReceivedFrames1.IndexOf(0xFF);  // 11111111
+                    stopbyte = ReceivedFrames1.IndexOf(0xFE);  // 11111110
                     //Если Начало кадра найдено, то отмечаем новое состояние 
                     if (startbyte != -1)
                     {
@@ -646,12 +646,12 @@ namespace main_application
                     { ReceivedFrames1.Clear();}
 
                 }
-                //Если уже был обнаружен стартовый байт, значит принимаем всё до конца буфера или до конечного байта 
-                //Заход в эту область происходит, если размер кадра оказался больше, чем буфер приема
+                // Если уже был обнаружен стартовый байт, значит принимаем всё до конца буфера или до конечного байта 
+                // Заход в эту область происходит, если размер кадра оказался больше, чем буфер приема
                 else if (State == ReceiveState.SOF_FOUND)
                 {
                     stopbyte = ReceivedFrames1.IndexOf(0xFE);
-                    //Если не найден стоповый байт, достаём из буфера кадров всё, что там есть 
+                    // Если не найден стоповый байт, достаём из буфера кадров всё, что там есть 
                     if (stopbyte == -1)
                     {
                         startbyte = ReceivedFrames1.IndexOf(0xFF);
@@ -667,7 +667,7 @@ namespace main_application
                         ReceivedFrames1.RemoveRange(0, ReceivedFrames1.Count);
 
                     }
-                    //Если стоповый байт найден, тогда вырезаем всё, что расположено до стопового байта, далее разбор кадра
+                    // Если стоповый байт найден, тогда вырезаем всё, что расположено до стопового байта, далее разбор кадра
                     else if (stopbyte != -1)
                     {
                         startbyte = ReceivedFrames1.IndexOf(0xFF);
@@ -680,13 +680,13 @@ namespace main_application
                             continue;
                         }
                         stopbyte = ReceivedFrames1.IndexOf(0xFE);
-                        //Добавляем в контейнер кадра до стопового байта, остальное переносим в начало буфера
+                        // Добавляем в контейнер кадра до стопового байта, остальное переносим в начало буфера
                         Frame.AddRange(ReceivedFrames1.GetRange(0, stopbyte + 1));
                         ReceivedFrames1.RemoveRange(0, stopbyte + 1);
                         State = ReceiveState.EOF_FOUND;
-                        //Запуск разбора кадра Frame, после этого перевод в состояние FREE И очистка контейнера кадра
+                        // Запуск разбора кадра Frame, после этого перевод в состояние FREE и очистка контейнера кадра
 
-                        //Запись найденного кадра в список заданий
+                        // Запись найденного кадра в список заданий
                         TaskReceived_mutex.WaitOne();
                         TasksReceived.Add(new One_Task("Port1", Frame.ToArray()));
                         TaskReceived_mutex.ReleaseMutex();
@@ -707,7 +707,7 @@ namespace main_application
             }
         }
         
-        //Всё тоже самое, что и для первого порта(Serial1_StartReceiving).
+        //Всё тоже самое, что и для первого порта (Serial1_StartReceiving).
         public void Serial2_StartReceiving()
         {
             if (!serialPort2.IsOpen)
@@ -741,7 +741,7 @@ namespace main_application
             }
         }
 
-        //Всё тоже самое, что и для первого порта(FindFrameInPort1).
+        // Всё тоже самое, что и для первого порта (FindFrameInPort1).
         public void FindFrameInPort2()
         {
             int startbyte;
@@ -902,8 +902,8 @@ namespace main_application
                 if (task_received == true)
                 {
                     byte[] frame = task.Frame;
-                    // не Number,  а Name
-                    //имена = {"Port1","Port2"} 
+                    // не Number, а Name
+                    // имена = {"Port1","Port2"} 
                     string PortNumber = task.PortNum;
 
                     DefaultFrame ReceivedFrameStruct = ParseReceivedFrame(frame);
@@ -913,7 +913,7 @@ namespace main_application
                         ReceivedFrameStruct.PortName = PortNumber;
                         byte frametype = ReceivedFrameStruct.Frametype;
 
-                        //ОПРЕДЕЛЕНИЕ НЕОБХОДИМОГО ОБРАБОТЧИКА
+                        // ОПРЕДЕЛЕНИЕ НЕОБХОДИМОГО ОБРАБОТЧИКА
                         if (frametype == (byte)FrameType.ACK || frametype == (byte)FrameType.RET)
                         {
                             if (frametype == (byte)FrameType.ACK)
@@ -963,7 +963,7 @@ namespace main_application
 
         public void FrameReceivedLogin(DefaultFrame ReceivedFrame)
         {
-            ////Отправка ACK кадра в PortName
+            // Отправка ACK кадра в PortName
             TaskToSend_mutex.WaitOne();
             TasksToSend.Add(
                 new One_Task(
@@ -999,16 +999,17 @@ namespace main_application
                 Auth_status_mutex.WaitOne();
                 Auth_status["ACK_local"] = "Received";
                 Auth_status_mutex.ReleaseMutex();
-                BeginInvoke(new SetTextDeleg(addtotextbox1), new object[] { "Логины абонентов получены\r\n" });
+                BeginInvoke(new SetTextDeleg(addtotextbox1), new object[] { "Логины всех абонентов получены\r\n" });
             }
 
         }
-        //Готово
+
+        // Готово
         public void FrameReceivedAck(DefaultFrame ReceivedFrameStruct)
         {
             string status_1_auth;
             string status_2_auth;
-            //Получение состояния авторизации
+            // Получение состояния авторизации
             Auth_status_mutex.WaitOne();
             status_1_auth = Auth_status["ACK1"];
             status_2_auth = Auth_status["ACK2"];
@@ -1544,7 +1545,7 @@ namespace main_application
         public void setport2state(string text)
         { port2state_label.Text = text; }
 
-        //Мониторит физическое состояние портов
+        // Мониторит физическое состояние портов
         public void serial1_monitor()
         {
             while (true)
@@ -1632,7 +1633,7 @@ namespace main_application
 
         private void button1_Click(object sender, EventArgs e)
         {
-            //Открытие портов
+            // Открытие портов
             Thread SerOpenthread1 = new Thread(OpenSerial1);
             Thread SerOpenthread2 = new Thread(OpenSerial2);
             SerOpenthread1.IsBackground = true;
@@ -1654,28 +1655,28 @@ namespace main_application
             this.button4.Enabled = true;
 
 
-            //После запуска потока, метод StartReceiving Осуществляет прием из входного буфера в программный буфер принятых байтов
+            // После запуска потока, метод StartReceiving осуществляет прием из входного буфера в программный буфер принятых байтов
             Thread ReceiverThr1 = new Thread(Serial1_StartReceiving);
             ReceiverThr1.IsBackground = true;
             ReceiverThr1.Start();
 
-            //FindFrame просматривает програмный буфер принятых байтов и составляет кадры, затем помещает  в список кадров(заданий)
+            // FindFrame просматривает програмный буфер принятых байтов и составляет кадры, затем помещает  в список кадров (заданий)
             Thread ParseFrameThr1 = new Thread(FindFrameInPort1);
             ParseFrameThr1.IsBackground = true;
             ParseFrameThr1.Start();
 
-            //После запуска потока, метод StartReceiving Осуществляет прием из входного буфера в программный буфер принятых байтов
+            // После запуска потока, метод StartReceiving осуществляет прием из входного буфера в программный буфер принятых байтов
             Thread ReceiverThr2 = new Thread(Serial2_StartReceiving);
             ReceiverThr2.IsBackground = true;
             ReceiverThr2.Start();
 
-            //FindFrame просматривает програмный буфер принятых байтов и составляет кадры, зате помещает  в список кадров(заданий)
+            // FindFrame просматривает програмный буфер принятых байтов и составляет кадры, зате помещает  в список кадров (заданий)
             Thread ParseFrameThr2 = new Thread(FindFrameInPort2);
             ParseFrameThr2.IsBackground = true;
             ParseFrameThr2.Start();
 
-            //Потоки нужны для определения состояния абонентов на физическом уровне
-            //Состояние пишут в UI и в Phys_status 1|2
+            // Потоки нужны для определения состояния абонентов на физическом уровне
+            // Состояние пишут в UI и в Phys_status 1|2
             Thread serial1_mon_thr = new Thread(serial1_monitor);
             serial1_mon_thr.IsBackground = true;
             serial1_mon_thr.Start();
@@ -1684,12 +1685,12 @@ namespace main_application
             serial2_mon_thr.IsBackground = true;
             serial2_mon_thr.Start();
 
-            //Обработка заданий, принятых из портов
+            // Обработка заданий, принятых из портов
             Thread TaskHandlerThr = new Thread(TaskHandler);
             TaskHandlerThr.IsBackground = true;
             TaskHandlerThr.Start();
 
-            //Обработка заданий на отправку
+            // Обработка заданий на отправку
             Thread TaskToSendHandlerThr = new Thread(TaskToSendHandler);
             TaskToSendHandlerThr.IsBackground = true;
             TaskToSendHandlerThr.Start();
@@ -1697,7 +1698,7 @@ namespace main_application
         }
         //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^//
 
-        //При закрытии формы порты тоже закрываются
+        // При закрытии формы порты тоже закрываются
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             while (serialPort1.IsOpen || serialPort2.IsOpen)
@@ -1722,7 +1723,7 @@ namespace main_application
         {
             while (true)
             {
-                //Получение задания из очереди на отправку кадра в порт
+                // Получение задания из очереди на отправку кадра в порт
                 TaskToSend_mutex.WaitOne();
                 if (TasksToSend.Count != 0)
                 {
@@ -1761,7 +1762,7 @@ namespace main_application
         // По кнопке начинает отсылать логины
         public void Establish_Logical()
         {
-            //Получение локальногго логина
+            // Получение локальногго логина
             AuthData_mutex.WaitOne();
             string local_auth_name = AuthData["local"];
             AuthData_mutex.ReleaseMutex();
@@ -1785,7 +1786,7 @@ namespace main_application
                 s2 = Auth_status["ACK2"];
                 Auth_status_mutex.ReleaseMutex();
 
-                //Если ACK1 или ACK2 были получены то прерываем попытки отправлять логины
+                // Если ACK1 или ACK2 были получены то прерываем попытки отправлять логины
                 if (s1 != "undef" && s2 != "undef")
                 {
                     BeginInvoke(new SetTextDeleg(addtotextbox1),
@@ -1794,7 +1795,7 @@ namespace main_application
                     return;
                 }
 
-                //Начальная попытка отправить LOGIN
+                // Начальная попытка отправить LOGIN
                 if (counter == 0)
                 {
                     Ack1_mutex_Auth.WaitOne();
@@ -1805,7 +1806,7 @@ namespace main_application
                     ack2 = Ack2_awaited_Auth;
                     Ack2_mutex_Auth.ReleaseMutex();
 
-                    //Если это первая попытка отправки, то в порты отсылаются логины
+                    // Если это первая попытка отправки, то в порты отсылаются логины
                     if (ack1 == 0 && ack2 == 0)
                     {
                         TaskToSend_mutex.WaitOne();
@@ -1813,7 +1814,7 @@ namespace main_application
                             (local_auth_name.Length).ToString(), "0", local_auth_name);
                         TasksToSend.Add(new One_Task("Port1", frame1));
 
-                        //Установка флага, что ожидается ack1
+                        // Установка флага, что ожидается ack1
                         Ack1_mutex_Auth.WaitOne();
                         Ack1_awaited_Auth = 1;
                         Ack1_mutex_Auth.ReleaseMutex();
@@ -1846,7 +1847,7 @@ namespace main_application
                 // Повторные попытки отправить логин
                 if (counter < 10 && counter != 0)
                 {
-                    //Получение текущего статуса доставки
+                    // Получение текущего статуса доставки
                     Ack1_mutex_Auth.WaitOne();
                     ack1 = Ack1_awaited_Auth;
                     Ack1_mutex_Auth.ReleaseMutex();
@@ -1855,7 +1856,7 @@ namespace main_application
                     ack2 = Ack2_awaited_Auth;
                     Ack2_mutex_Auth.ReleaseMutex();
 
-                    //Если ack 1&2 были получены
+                    // Если ack 1&2 были получены
                     if (ack1 == 0 && ack2 == 0)
                     {
                         Auth_status_mutex.WaitOne();
@@ -1898,13 +1899,13 @@ namespace main_application
 
                         TaskToSend_mutex.ReleaseMutex();
                         counter++;
-                        BeginInvoke(new SetTextDeleg(addtotextbox1), new object[] { " Попыток передать логин (пк на порт2) : " + counter.ToString() + "\r\n" });
+                        BeginInvoke(new SetTextDeleg(addtotextbox1), new object[] { "Попыток передать логин (пк на порт2) : " + counter.ToString() + "\r\n" });
 
                     }
                 }
                 else if (counter != 0)
                 {
-                    BeginInvoke(new SetTextDeleg(addtotextbox1), new object[] { " Передать логин не удалось. Попыток: " + counter.ToString() + "\r\n" });
+                    BeginInvoke(new SetTextDeleg(addtotextbox1), new object[] { "Передать логин не удалось. Попыток: " + counter.ToString() + "\r\n" });
                     return;
                 }
                 Thread.Sleep(4000);
@@ -1946,10 +1947,10 @@ namespace main_application
             }
         }
 
-        //Кнопка попытки авторизации
+        // Кнопка попытки авторизации
         private void AuthConnectButton_Click(object sender, EventArgs e)
         {
-            //Получение значений статуса физ подключения (берется из serial_monitor) 
+            // Получение значений статуса физ подключения (берется из serial_monitor) 
             Phys_status1_mutex.WaitOne();
             Connection_Status local_status1 = Phys_status1;
             Phys_status1_mutex.ReleaseMutex();
@@ -1964,7 +1965,7 @@ namespace main_application
                 return;
             }
 
-            //Получение логина
+            // Получение логина
             string local_login = LogintextBox.Text.Trim();
             if (string.IsNullOrWhiteSpace(local_login))
             {
@@ -1977,18 +1978,18 @@ namespace main_application
                 AuthData["local"] = local_login;
                 AuthData_mutex.ReleaseMutex();
             }
-            //Запуск потока, следящего за ходом авторизации
+            // Запуск потока, следящего за ходом авторизации
             Thread Auth_Trackerthr = new Thread(Auth_Tracker);
             Auth_Trackerthr.IsBackground = true;
             Auth_Trackerthr.Start();
 
-            //Попытка отправить свой логин 
+            // Попытка отправить свой логин 
             Thread connect_logicalthr = new Thread(Establish_Logical);
             connect_logicalthr.Start();
 
         }
 
-        //Кнопка деавторизации, Disconnect
+        // Кнопка деавторизации, Disconnect
         private void AuthDisconnectButton_click(object sender, EventArgs e)
         {
             AuthData_mutex.WaitOne();
@@ -2117,11 +2118,6 @@ namespace main_application
                 "    Зубков А.Д.\r\n" +
                 "    Меркулова Н.А.\r\n" +
                 "    Турусов В.И.", "Справка");
-        }
-
-        private void ReceiverComboBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
         }
     }
 }
