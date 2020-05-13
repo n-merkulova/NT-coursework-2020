@@ -7,7 +7,6 @@ using System.Threading;
 using System.Linq;
 using Newtonsoft.Json;
 
-
 namespace main_application
 {
     public partial class Form1 : Form
@@ -155,9 +154,7 @@ namespace main_application
                 this.re = letter.re.ToString();
                 this.msg = letter.msg.ToString();
                 this.status = letter.status.ToString();
-
                 //this.date_sent = letter.date_sent.ToString();
-
             }
         };
         #endregion
@@ -1139,10 +1136,10 @@ namespace main_application
                 {
                     if (result.status == "Прочитано")
                     {
-                        BeginInvoke(new SetTextDeleg(addtotextbox1), new object[] { $" Сообщение : письмо с id = {LetterId} уже было прочитано\r\n" });
+                        BeginInvoke(new SetTextDeleg(addtotextbox1), new object[] { $"Сообщение : письмо с id = {LetterId} уже было прочитано\r\n" });
                     }
                     else {
-                        BeginInvoke(new SetTextDeleg(addtotextbox1), new object[] { $" Сообщение : письмо с id = {LetterId} было прочитано\r\n" });
+                        BeginInvoke(new SetTextDeleg(addtotextbox1), new object[] { $"Сообщение : письмо с id = {LetterId} было прочитано\r\n" });
                         result.status = "Прочитано";
                         db.SaveChanges();
                         //Отметка для обновления формы отправленных сообщений
@@ -1161,10 +1158,6 @@ namespace main_application
             inbox_class message_data = JsonConvert.DeserializeObject<inbox_class>(local_frame.MessageData);
             if (local_frame.ResultOfParsing == "OK")
             {
-                BeginInvoke
-                     (new SetTextDeleg(addtotextbox1),
-                     new object[] { $"Получено письмо от {message_data.sender}" + "\r\n" });
-
                 long foreign_id = long.Parse(message_data.id);
                 inbox received_letter = new inbox();
                 received_letter.foreign_id = foreign_id;
@@ -1172,6 +1165,8 @@ namespace main_application
                 received_letter.msg = message_data.msg;
                 received_letter.recepient = message_data.recepient;
                 received_letter.sender = message_data.sender;
+                //received_letter.date_received = message_data.date_received;
+                received_letter.date_received = DateTime.Now.ToString();
                 received_letter.status = "Принято";
                 using (CourseDB db = new CourseDB())
                 {
@@ -1186,6 +1181,10 @@ namespace main_application
                     { letter_already_exists = false; }
                     if (!letter_already_exists)
                     {
+                        BeginInvoke
+                            (new SetTextDeleg(addtotextbox1),
+                            new object[] { $"Получено письмо от {message_data.sender}" + "\r\n" });
+
                         db.inbox.Add(received_letter);
                         db.SaveChanges();
                     }
@@ -1248,7 +1247,7 @@ namespace main_application
                 if (!frame_is_to_resend)
                 {
                     BeginInvoke(new SetTextDeleg(addtotextbox1), new object[]
-                                            { "Сообщение доставлено"});
+                                            { "Сообщение доставлено\r\n"});
 
                     using (CourseDB db = new CourseDB())
                     {
@@ -1271,14 +1270,14 @@ namespace main_application
                     TasksToSend.Add(frame_acked1);
                     TaskToSend_mutex.ReleaseMutex();
                     BeginInvoke(new SetTextDeleg(addtotextbox1), new object[]
-                          {$"сообщение(попытка:{counter}, порт:{frame_acked1.PortNum}"});
+                          {$"Сообщение(попытка:{counter}, порт:{frame_acked1.PortNum})\r\n"});
                     counter++;
                 }
 
                 if (counter > 10 && frame_is_to_resend)
                 {
                     BeginInvoke(new SetTextDeleg(addtotextbox1), new object[]
-                                    { "Сообщение  не было доставлено"});
+                                    { "Сообщение  не было доставлено\r\n"});
                     using (CourseDB db = new CourseDB())
                     {
                         DefaultFrame a = ParseReceivedFrame(LastFrameSenttoPort1.Frame);
@@ -1315,7 +1314,7 @@ namespace main_application
                 if (!frame_is_to_resend)
                 {
                     BeginInvoke(new SetTextDeleg(addtotextbox1), new object[]
-                                            { "Сообщение доставлено"});
+                                            { "Сообщение доставлено\r\n"});
 
                     using (CourseDB db = new CourseDB())
                     {
@@ -1337,14 +1336,14 @@ namespace main_application
                     TasksToSend.Add(frame_acked2);
                     TaskToSend_mutex.ReleaseMutex();
                     BeginInvoke(new SetTextDeleg(addtotextbox1), new object[]
-                                           {$"сообщение(попытка:{counter}, порт:{frame_acked2.PortNum}"});
+                                           {$"Cообщение(попытка:{counter}, порт:{frame_acked2.PortNum})\r\n"});
                     counter++;
                 }
 
                 if (counter > 10 && frame_is_to_resend)
                 {
                     BeginInvoke(new SetTextDeleg(addtotextbox1), new object[]
-                                            { "Сообщение  не было доставлено"});
+                                            { "Сообщение  не было доставлено\r\n"});
                     using (CourseDB db = new CourseDB())
 
                     {
@@ -1380,7 +1379,7 @@ namespace main_application
 
             if (p1 != Connection_Status.CONNECTED || p2 != Connection_Status.CONNECTED)
             {
-                BeginInvoke(new SetTextDeleg(addtotextbox1), new object[] { "физическое соединение не установлено\r\n" });
+                BeginInvoke(new SetTextDeleg(addtotextbox1), new object[] { "Физическое соединение не установлено\r\n" });
                 return;
             }
 
@@ -1401,6 +1400,7 @@ namespace main_application
                 letter.recepient = Receiver_name;
                 letter.status = "Отправлено";
                 letter.msg = Letter_Message;
+                letter.date_sent = DateTime.Now.ToString();
                 db.outbox.Add(letter);
                 db.SaveChanges();
             }
@@ -1413,6 +1413,7 @@ namespace main_application
             }
             string letter_local_id = a.id.ToString();
             string receiver_port = AuthData.FirstOrDefault(x => x.Value == Receiver_name).Key;
+            a.date_sent = "";
             outbox_class letter_payload_obj = new outbox_class(a);
             string letter_payload_string = JsonConvert.SerializeObject(letter_payload_obj);
             string letter_len = letter_payload_string.Length.ToString();
@@ -1823,7 +1824,7 @@ namespace main_application
 
                         counter++;
                         BeginInvoke(new SetTextDeleg(addtotextbox1), new object[] {
-                            " Попыток логин соединения (пк на порт1) : " + counter.ToString() + "\r\n" });
+                            "Попыток логин соединения (пк на порт1) : " + counter.ToString() + "\r\n" });
 
 
                         TaskToSend_mutex.WaitOne();
@@ -1838,7 +1839,7 @@ namespace main_application
 
                         TaskToSend_mutex.ReleaseMutex();
                         counter++;
-                        BeginInvoke(new SetTextDeleg(addtotextbox1), new object[] { " Попыток логин соединения (пк на порт2) : " + counter.ToString() + "\r\n" });
+                        BeginInvoke(new SetTextDeleg(addtotextbox1), new object[] { "Попыток логин соединения (пк на порт2) : " + counter.ToString() + "\r\n" });
                         Thread.Sleep(4000);
                         continue;
                     }
@@ -1867,7 +1868,7 @@ namespace main_application
                         Auth_status["ACK2"] = "Received";
                         Auth_status_mutex.ReleaseMutex();
 
-                        BeginInvoke(new SetTextDeleg(addtotextbox1), new object[] { "Переданные логины доставлены  \r\n" });
+                        BeginInvoke(new SetTextDeleg(addtotextbox1), new object[] { "Переданные логины доставлены\r\n" });
                         return;
                     }
 
@@ -1883,7 +1884,7 @@ namespace main_application
 
                         TaskToSend_mutex.ReleaseMutex();
                         counter++;
-                        BeginInvoke(new SetTextDeleg(addtotextbox1), new object[] { " Попыток передать логин (пк на порт1) : " + counter.ToString() + "\r\n" });
+                        BeginInvoke(new SetTextDeleg(addtotextbox1), new object[] { "Попыток передать логин (пк на порт1) : " + counter.ToString() + "\r\n" });
 
                     }
 
@@ -1961,7 +1962,7 @@ namespace main_application
 
             if (local_status1 != Connection_Status.CONNECTED || local_status2 != Connection_Status.CONNECTED)
             {
-                BeginInvoke(new SetTextDeleg(addtotextbox1), new object[] { "Проверьте физическое соединение \r\n" });
+                BeginInvoke(new SetTextDeleg(addtotextbox1), new object[] { "Проверьте физическое соединение\r\n" });
                 return;
             }
 
@@ -1969,7 +1970,7 @@ namespace main_application
             string local_login = LogintextBox.Text.Trim();
             if (string.IsNullOrWhiteSpace(local_login))
             {
-                BeginInvoke(new SetTextDeleg(addtotextbox1), new object[] { "Проверьте введенный логин \r\n" });
+                BeginInvoke(new SetTextDeleg(addtotextbox1), new object[] { "Проверьте введенный логин\r\n" });
                 return;
             }
             else
@@ -2121,5 +2122,3 @@ namespace main_application
         }
     }
 }
-
-

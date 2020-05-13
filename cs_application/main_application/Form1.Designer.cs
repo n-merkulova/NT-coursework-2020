@@ -161,7 +161,7 @@
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(6, 2, 0, 2);
-            this.menuStrip1.Size = new System.Drawing.Size(1010, 40);
+            this.menuStrip1.Size = new System.Drawing.Size(1010, 42);
             this.menuStrip1.TabIndex = 36;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -196,7 +196,7 @@
             this.порт2ToolStripMenuItem,
             this.дополнительноToolStripMenuItem});
             this.настройкаПортовToolStripMenuItem.Name = "настройкаПортовToolStripMenuItem";
-            this.настройкаПортовToolStripMenuItem.Size = new System.Drawing.Size(237, 36);
+            this.настройкаПортовToolStripMenuItem.Size = new System.Drawing.Size(242, 38);
             this.настройкаПортовToolStripMenuItem.Text = "Настройка портов";
             // 
             // скоростьToolStripMenuItem

@@ -183,7 +183,7 @@ namespace main_application
                                 // Конвертирование из utf-8 в win1251 уже предусмотрено в функции
                                 byte[] frame = form1.CreateNewFrame(Form1.FrameType.OPENLETTER, "0", len.ToString(), "0", foreign_id_string, false);
 
-                                Form1.One_Task openletterframe = new Form1.One_Task();
+                                //Form1.One_Task openletterframe = new Form1.One_Task();
 
                                 form1.TaskToSend_mutex.WaitOne();
                                 form1.TasksToSend.Add(new Form1.One_Task(Receiver_Port, frame));
