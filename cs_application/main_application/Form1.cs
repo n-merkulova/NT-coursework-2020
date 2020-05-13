@@ -109,6 +109,7 @@ namespace main_application
         };
         public Mutex AuthData_mutex = new Mutex();
 
+        public Boolean LetterReceived_flag = false;
 
         #region Описание Модели Данных
 
@@ -1161,9 +1162,7 @@ namespace main_application
             inbox_class message_data = JsonConvert.DeserializeObject<inbox_class>(local_frame.MessageData);
             if (local_frame.ResultOfParsing == "OK")
             {
-                BeginInvoke
-                     (new SetTextDeleg(addtotextbox1),
-                     new object[] { $"Получено письмо от {message_data.sender}" + "\r\n" });
+
 
                 long foreign_id = long.Parse(message_data.id);
                 inbox received_letter = new inbox();
@@ -1186,6 +1185,7 @@ namespace main_application
                     { letter_already_exists = false; }
                     if (!letter_already_exists)
                     {
+                        BeginInvoke(new SetTextDeleg(addtotextbox1), new object[] { $"Получено письмо от {message_data.sender}" + "\r\n" });
                         db.inbox.Add(received_letter);
                         db.SaveChanges();
                     }
@@ -1271,21 +1271,21 @@ namespace main_application
                     TasksToSend.Add(frame_acked1);
                     TaskToSend_mutex.ReleaseMutex();
                     BeginInvoke(new SetTextDeleg(addtotextbox1), new object[]
-                          {$"сообщение(попытка:{counter}, порт:{frame_acked1.PortNum}"});
+                          {$"Отправка (попытка:{counter + 1}, порт: {frame_acked1.PortNum})"  + "\r\n"});
                     counter++;
                 }
 
                 if (counter > 10 && frame_is_to_resend)
                 {
                     BeginInvoke(new SetTextDeleg(addtotextbox1), new object[]
-                                    { "Сообщение  не было доставлено"});
+                                    { "Сообщение не было доставлено" + "\r\n"});
                     using (CourseDB db = new CourseDB())
                     {
                         DefaultFrame a = ParseReceivedFrame(LastFrameSenttoPort1.Frame);
                         string id_string = JsonConvert.DeserializeObject<outbox_class>(a.MessageData).id;
                         long id_val = long.Parse(id_string);
                         var last_letter = db.outbox.FirstOrDefault<outbox>(x => x.id == id_val);
-                        last_letter.status = "Не Доставлено";
+                        last_letter.status = "Не lоставлено";
                         db.SaveChanges();
                     }
                     Outbox_update_mutex.WaitOne();
